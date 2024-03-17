@@ -40,6 +40,12 @@ sudo usermod -a -G gpio pi
 echo 5. Installing pyvisa instrument interface library
 pip install -U pyvisa
 pip install -U pyvisa-py
+pip install pyUSB
+pip install pySerial
+pip install psutil
+pip install zeroconf
+
+
 
 PATH=$PATH:/home/pi/.local/bin
 
