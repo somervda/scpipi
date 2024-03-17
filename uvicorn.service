@@ -9,7 +9,7 @@ User=pi
 Group=pi  
 WorkingDirectory=/home/pi/scpipi
 ExecStart=/home/pi/.local/bin/uvicorn \
-        --host scpipi.home web:app
+        --host scpipi.local web:app
 
 [Install]
 WantedBy=multi-user.target

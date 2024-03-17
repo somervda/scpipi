@@ -10,7 +10,7 @@
 
 
 # Make sure apt is updated and we have the latest package lists before we start
-# Remember to 'chmod u+x pimidi_setup.sh' to be able to run this script 
+# Remember to 'chmod u+x setup.sh' to be able to run this script 
 # then 'bash setup.sh'
 
 date
@@ -37,17 +37,26 @@ pip install RPi.GPIO
 echo 4. Installing python i2c and oled support
 sudo usermod -a -G gpio pi
 
-echo 5. Install fastapi for web services and a ASGI web server
+echo 5. Installing pyvisa instrument interface library
+pip install -U pyvisa
+pip install -U pyvisa-py
+
+PATH=$PATH:/home/pi/.local/bin
+
+echo 6. Install fastapi for web services and a ASGI web server
 pip install fastapi
 pip install "uvicorn[standard]"
 # Note: I run uvicorn using this command during development
 # uvicorn web:app --reload --host pimidi.home
 
 
+
 # Add uvicorn.service to the /lib/systemd/system/ folder
-echo 6. Setup the pimidi_uvicorn.service to run on startup 
+# By default service is not enabled and stopped
+echo 7. Setup the pimidi_uvicorn.service to run on startup 
 sudo cp uvicorn.service /lib/systemd/system/uvicorn.service
-sudo systemctl enable uvicorn.service
-sudo systemctl start uvicorn.service 
+# sudo systemctl enable uvicorn.service
+# sudo systemctl start uvicorn.service 
+sudo systemctl status uvicorn.service 
 
 date
