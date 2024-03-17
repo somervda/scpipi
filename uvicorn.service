@@ -1,0 +1,15 @@
+[Unit]
+Description=Uvicorn Webservice Startup (Runs Uvicorn)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi  
+WorkingDirectory=/home/pi/scpipi
+ExecStart=/home/pi/.local/bin/uvicorn \
+        --host scpipi.home web:app
+
+[Install]
+WantedBy=multi-user.target
