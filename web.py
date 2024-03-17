@@ -30,11 +30,31 @@ app.add_middleware(
 )
 
 rm = pyvisa.ResourceManager('@py')
-# print(rm.list_resources())
+print(rm.list_resources())
+
+
 
 # owon xpm1241 services
+xpm1241 = None
 
-xpm1241 = rm.open_resource('ASRL/dev/ttyUSB0::INSTR',baud_rate=115200)
+@app.get("/xpm1241/connect")
+def xpm1241Connect():
+    global xpm1241
+    # Look for the xpm1241 device among the resources
+    xpm1241=None
+    for resource in rm.list_resources('^ASRL/dev/ttyUSB'):
+        rName  = resource
+        try:
+            r= rm.open_resource(rName,baud_rate=115200)
+            if "XDM1241" in r.query('*IDN?'):
+                print("resource:",resource)
+                xpm1241 = r
+        except:
+            pass
+    if xpm1241:
+        return(True)
+    else:
+        return(False)
 
 @app.get("/xpm1241/config/{type}/{rate}/{range}")
 # type: voltdc,voltac,currdc,currac,res,temp
@@ -43,23 +63,36 @@ xpm1241 = rm.open_resource('ASRL/dev/ttyUSB0::INSTR',baud_rate=115200)
 async def xpm1241Config(type: Annotated[str, Path(title="type: voltdc,voltac,currdc,currac,res,temp")],
     rate: Annotated[str, Path(title="rate: S/M/F (Slow/Medium/Fast sampling)")],
     range: Annotated[str, Path(title="range: auto,1-9")]): 
-    # Build configuration string
-    config = "CONFigure:"
-    match type:
-        case "voltdc" :
+    global xpm1241
+    if not xpm1241:
+        print("Connect to xpm1241")
+        xpm1241Connect()
+    if xpm1241:
+        # Build configuration string
+        config = "CONFigure:"
+        if type== "voltdc" :
             config += "VOLT:DC"
-        case "voltac" :
+        elif type ==  "voltac" :
             config += "VOLT:AC"
-        case "currdc" :
+        elif type ==  "currdc" :
             config += "CURR:DC"
-        case "currac" :
+        elif type ==   "currac" :
             config += "CURR:AC"
-        case "res" :
+        elif type ==   "res" :
             config += "RES"
-        case "temp" :
+        elif type ==  "temp" :
             config += "TEMP"
-    result= xpm1241.query(config)
-    return{result}
+        try:
+            result= xpm1241.write(config)
+            return{True}
+        except OSError:
+            print("xpm1241 oserror")
+            xpm1241 = None
+            return{False}
+    else:
+        print("No xpm1241 found")
+        return(False)
+
 
 # Note: Make sure this line is at the end of the file so fastAPI falls through the other
 # routes before serving up static files 
