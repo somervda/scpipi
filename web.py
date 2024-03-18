@@ -47,7 +47,7 @@ def xpm1241Connect():
         try:
             r= rm.open_resource(rName,baud_rate=115200)
             if "XDM1241" in r.query('*IDN?'):
-                print("resource:",resource)
+                # print("resource:",resource)
                 xpm1241 = r
         except:
             pass
@@ -65,7 +65,7 @@ async def xpm1241Config(type: Annotated[str, Path(title="type: voltdc,voltac,cur
     range: Annotated[str, Path(title="range: auto,1-9")]): 
     global xpm1241
     if not xpm1241:
-        print("Connect to xpm1241")
+        # print("Connect to xpm1241")
         xpm1241Connect()
     if xpm1241:
         # Build configuration string
@@ -86,11 +86,30 @@ async def xpm1241Config(type: Annotated[str, Path(title="type: voltdc,voltac,cur
             result= xpm1241.write(config)
             return{True}
         except OSError:
-            print("xpm1241 oserror")
+            # print("xpm1241 oserror")
             xpm1241 = None
             return{False}
     else:
         print("No xpm1241 found")
+        return(False)
+
+
+@app.get("/xpm1241/measure")
+async def xpm1241Config(): 
+    global xpm1241
+    if not xpm1241:
+        # print("Connect to xpm1241")
+        xpm1241Connect()
+    if xpm1241:
+        try:
+            result = xpm1241.query('MEAS1?')
+            return{result}
+        except OSError:
+            # print("xpm1241 oserror")
+            xpm1241 = None
+            return{False}
+    else:
+        # print("No xpm1241 found")
         return(False)
 
 
