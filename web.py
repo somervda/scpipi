@@ -107,7 +107,7 @@ async def xpm1241Config(type: Annotated[str, Path(title="type: voltdc,voltac,cur
                 configCmd += " 500E-3"
             elif range == 4:
                 configCmd += " 5"
-            elif range == 4:
+            elif range == 5:
                 configCmd += " 10"
             else:
                 configCmd += " AUTO"
@@ -121,7 +121,7 @@ async def xpm1241Config(type: Annotated[str, Path(title="type: voltdc,voltac,cur
                 configCmd += " 500E-3"
             elif range == 4:
                 configCmd += " 5"
-            elif range == 4:
+            elif range == 5:
                 configCmd += " 10"
             else:
                 configCmd += " AUTO"
@@ -139,8 +139,6 @@ async def xpm1241Config(type: Annotated[str, Path(title="type: voltdc,voltac,cur
                 configCmd += " 5E6"
             elif range == 6:
                 configCmd += " 50E6"
-            elif range == 7:
-                configCmd += " 500E6"
             else:
                 configCmd += " AUTO"
         elif type ==  "freq" :
