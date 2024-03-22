@@ -91,9 +91,13 @@ print("FREQ",r.query('C1:PAVA? FREQ'))
 # Test rigol
 # https://int.rigol.com/Public/Uploads/uploadfile/files/ftp/DS/%E6%89%8B%E5%86%8C/DS1000Z/EN/DS1000Z_ProgrammingGuide_EN.pdf
 #  https://github.com/lxi-tools/lxi-tools/wiki/Rigol-DS1000Z-series
-r = rm.open_resource('TCPIP::DSO804.home::INSTR')
-print(r.query('*IDN?'))
-print("PKPK",r.query(':MEASure:ITEM? VRMS,CHANnel1'))
+try:
+    r = rm.open_resource('TCPIP::DSO804.home::INSTR')
+except:
+    print("Rigol not found")
+else:
+    print(r.query('*IDN?'))
+    print("PKPK",r.query(':MEASure:ITEM? VRMS,CHANnel1'))
 
 
 
