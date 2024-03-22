@@ -31,20 +31,23 @@ echo 3. Installing OPi.GPIO
 # Install GPIO support for the orange PI 
 # see https://pypi.org/project/RPi.GPIO/ and https://sourceforge.net/p/raspberry-gpio-python/wiki/Home/ 
 # Note: Use GPIO.setmode(GPIO.SUNXI) to use "PA01" style channel naming
-pip install RPi.GPIO
+pip install  RPi.GPIO
 
 
 echo 4. Installing python i2c and oled support
 sudo usermod -a -G gpio pi
 export PATH=$PATH:/home/pi/.local/bin
 
-echo 5. Installing pyvisa instrument interface library
+echo 5. Installing pyvisa instrument interface library and lxi-tools
 pip install -U pyvisa
 pip install -U pyvisa-py
 pip install pyUSB
 pip install pySerial
 pip install psutil
 pip install zeroconf
+# Also install lxi-tools for scpi debugging
+# eg lxi scpi --address sds1052.home "*IDN?"
+sudo apt install -y lxi-tools
 
 
 echo 6. Install fastapi for web services and a ASGI web server

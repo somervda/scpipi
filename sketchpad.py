@@ -1,10 +1,14 @@
 import pyvisa
 import time
+
+
 xpm1241=None
 
 
 rm = pyvisa.ResourceManager('@py')
-print(rm.list_resources('^ASRL/dev/ttyUSB'))
+print(rm.list_resources())
+
+
 
 
 # Look for Resources on USB
@@ -23,7 +27,7 @@ for resource in rm.list_resources('^ASRL/dev/ttyUSB'):
     except:
         print("jds6600 not found:")
         pass
-        
+
 if jds6600 != None:
     #  Example talking to JDS6600 signal generator
     # See file://snas/Documents/Manuals/JT-JDS6600-Communication-protocol.pdf 
@@ -44,8 +48,8 @@ if jds6600 != None:
     # Return OK if successful (And talking to the signal generator)
     print("Waveform 0:",result)
 
-    result=jds6600.query(":w23=200000,0.")
-    print("Frequency 2000Hz",result)
+    result=jds6600.query(":w23=20000,0.")
+    print("Frequency 200Hz",result)
 
     result=jds6600.query(":w25=1400.")
     print("Level 1.4V",result)
@@ -73,6 +77,24 @@ if xpm1241 != None:
 #  See file://snas/Documents/Manuals/SDS1000-ProgrammingGuide_forSDS-1-1.pdf 
 
 #     time.sleep(5)
+
+r = rm.open_resource('TCPIP::sds1052.home::INSTR')
+print(r.query('*IDN?'))
+# print("set ASET")
+# r.write('ASET')
+# time.sleep(5)
+#  See https://github.com/lxi-tools/lxi-tools/wiki/Siglent-SDS1000CML-CNL-series 
+print("PKPK",r.query('C1:PAVA? ALL'))
+print("RMS",r.query('C1:PAVA? RMS'))
+print("FREQ",r.query('C1:PAVA? FREQ'))
+
+# Test rigol
+# https://int.rigol.com/Public/Uploads/uploadfile/files/ftp/DS/%E6%89%8B%E5%86%8C/DS1000Z/EN/DS1000Z_ProgrammingGuide_EN.pdf
+#  https://github.com/lxi-tools/lxi-tools/wiki/Rigol-DS1000Z-series
+r = rm.open_resource('TCPIP::DSO804.home::INSTR')
+print(r.query('*IDN?'))
+print("PKPK",r.query(':MEASure:ITEM? VRMS,CHANnel1'))
+
 
 
 
