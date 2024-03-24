@@ -45,18 +45,18 @@ def xpm1241Connect():
     # Look for the xpm1241 device among the resources
     xpm1241=None
     for resource in rm.list_resources('^ASRL/dev/ttyUSB'):
-        rName  = resource
+        name  = resource
         try:
-            r= rm.open_resource(rName,baud_rate=115200)
+            r= rm.open_resource(name,baud_rate=115200)
             if "XDM1241" in r.query('*IDN?'):
-                # print("resource:",resource)
+                print("r:",r,"name:",name)
                 xpm1241 = r
         except:
             pass
     if xpm1241:
-        return(True)
+        return True
     else:
-        return(False)
+        return False
 
 @app.get("/xpm1241/config/{type}/{range}/{rate}")
 async def xpm1241Config(type: Annotated[str, Path(title="type: voltdc,voltac,currdc,currac,res,temp")],
@@ -161,14 +161,21 @@ async def xpm1241Config(type: Annotated[str, Path(title="type: voltdc,voltac,cur
             time.sleep(.1)
             result= xpm1241.write(configCmd)
             time.sleep(.1)
-            return{True}
+            try:
+                # Check we are connected for real
+                testResult = xpm1241.query('MEAS1?')
+            except:
+                xpm1241 = None
+                return False
+            else:
+                return True
         except OSError:
             # print("xpm1241 oserror")
             xpm1241 = None
-            return{False}
+            return False
     else:
         print("No xpm1241 found")
-        return(False)
+        return False
 
 
 @app.get("/xpm1241/measure")
