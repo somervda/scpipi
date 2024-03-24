@@ -162,7 +162,8 @@ async def xpm1241Config(type: Annotated[str, Path(title="type: voltdc,voltac,cur
             result= xpm1241.write(configCmd)
             time.sleep(.1)
             try:
-                # Check we are connected for real
+                # Check we are really connected 
+                # by doing a dummy query
                 testResult = xpm1241.query('MEAS1?')
             except:
                 xpm1241 = None
