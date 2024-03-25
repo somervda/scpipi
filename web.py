@@ -8,7 +8,7 @@
 import sys
 import time
 import asyncio
-import pyvisa
+# import pyvisa
 
 
 
@@ -32,7 +32,7 @@ app.add_middleware(
 )
 
 # Make a xdm1241 object
-xdm1241 = Xdm1241(quiet=False)
+xdm1241 = Xdm1241(quiet=True)
 
 @app.get("/xdm1241/connect")
 def xdm1241Connect():

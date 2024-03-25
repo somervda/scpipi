@@ -13,10 +13,12 @@ class Xdm1241:
     _quiet = True
 
     def __init__(self,quiet=True):
-        self.rm = pyvisa.ResourceManager('@py')
         self._quiet = quiet
+        not self._quiet and print("__init__")
+        self.rm = pyvisa.ResourceManager('@py')
 
     def connect(self):
+        not self._quiet and print("connect")
         # Look for the _xdm1241 device among the resources
         self._xdm1241=None
         not self._quiet and  print(self.rm.list_resources())
@@ -36,6 +38,7 @@ class Xdm1241:
         return  self.isConnected()
 
     def configure(self,type, range,rate):
+        not self._quiet and print("configure",type,range,rate)
         self._type = ''
         self._range = ''
         self._rate = ''
@@ -159,6 +162,7 @@ class Xdm1241:
 
 
     def measure(self): 
+        not self._quiet and print("measure")
         if not self.isConnected():
             not self._quiet and  print("Connect to _xdm1241")
             self.connect()
@@ -175,22 +179,26 @@ class Xdm1241:
             return(False)
 
     def isConnected(self):
+        not self._quiet and print("isConnected")
         if self._xdm1241:
             return True
         else: 
             return False
 
     def get_type(self):
+        not self._quiet and print("get_type")
         return self._type
 
     type = property(get_type)
 
     def get_range(self):
+        not self._quiet and print("get_range")
         return self._range
 
     range = property(get_range)
 
     def get_rate(self):
+        not self._quiet and print("get_rate")
         return self._rate
 
     rate = property(get_rate)
