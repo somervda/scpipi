@@ -3,40 +3,39 @@
 import time
 import pyvisa
 class Xdm1241:
-    # owon xdm1241 services
+    # owon _xdm1241 services
     #  See https://files.owon.com.cn/software/Application/XDM1000_Digital_Multimeter_Programming_Manual.pdf 
     # for scpi commands
+    _type = ''
+    _xdm1241 = None
+    _range = ''
+    _rate = ''
 
     def __init__(self):
         self.rm = pyvisa.ResourceManager('@py')
-        self.type = None
-        self.range=None
-        self.rate=None
         print(self.rm.list_resources())
-        self.xdm1241 = None
-    
 
     def connect(self):
-        # Look for the xdm1241 device among the resources
-        self.xdm1241=None
+        # Look for the _xdm1241 device among the resources
+        self._xdm1241=None
         for resource in self.rm.list_resources('^ASRL/dev/ttyUSB'):
             name  = resource
             try:
-                resourceRef= self.rm.open_resource(name,baud_rate=115200)
+                resourceRef= self.rm.open_resource(name,baud__rate=115200)
                 if "XDM1241" in resourceRef.query('*IDN?'):
                     print("resourceRef:",resourceRef,"name:",name)
-                    self.xdm1241 = resourceRef
+                    self._xdm1241 = resourceRef
                     break
             except:
                 pass
         return  self.isConnected()
 
     def configure(self,type, range,rate):
-        self.type = None
-        self.range = None
-        self.rate =None
+        self._type = ''
+        self._range = ''
+        self._rate = ''
         if not self.isConnected():
-            # print("Connect to xdm1241")
+            # print("Connect to _xdm1241")
             self.connect()
         if self.isConnected():
             # Build configCmduration string
@@ -118,7 +117,7 @@ class Xdm1241:
             elif type ==  "temp" :
                 configCmd += "TEMP"
             print(configCmd)
-            # Also build the rate command
+            # Also build the _rate command
             rateCmd = "RATE "
             if rate== 1 :
                 rateCmd += "M"
@@ -129,64 +128,64 @@ class Xdm1241:
 
             try:
                 # Set rate,type and range
-                result= self.xdm1241.write(rateCmd)
+                result= self._xdm1241.write(rateCmd)
                 time.sleep(.1)
-                result= self.xdm1241.write(configCmd)
+                result= self._xdm1241.write(configCmd)
                 time.sleep(.1)
                 try:
                     # Check we are really connected 
                     # by doing a dummy query
-                    testResult = self.xdm1241.query('MEAS1?')
+                    testResult = self._xdm1241.query('MEAS1?')
                 except:
-                    self.xdm1241=None
+                    self._xdm1241=None
                     return False
                 else:
-                    self.type = type
-                    self.range = range
-                    self.rate = rate
+                    self._type = type
+                    self._range = range
+                    self._rate = rate
                     return True
             except OSError:
-                # print("xdm1241 oserror")
-                self.xdm1241=None
+                # print("_xdm1241 oserror")
+                self._xdm1241=None
                 return False
         else:
-            print("No xdm1241 found")
+            print("No _xdm1241 found")
             return False
 
 
     def measure(self): 
         if not self.isConnected():
-            # print("Connect to xdm1241")
+            # print("Connect to _xdm1241")
             self.connect()
         if self.isConnected():
             try:
-                result = self.xdm1241.query('MEAS1?')
+                result = self._xdm1241.query('MEAS1?')
                 return{result}
             except OSError:
-                # print("xdm1241 oserror")
-                self.xdm1241 = None
+                # print("_xdm1241 oserror")
+                self._xdm1241 = None
                 return{False}
         else:
-            # print("No xdm1241 found")
+            # print("No _xdm1241 found")
             return(False)
 
-def isConnected(self):
-    if self.xdm1421 :
-        return True
-    else: 
-        return False
+    def isConnected(self):
+        if self._xdm1421:
+            return True
+        else: 
+            return False
 
-def get_type(self):
-    return self.type
+    def get_type(self):
+        return self._type
 
-type = property(get_type)
+    type = property(get_type)
 
-def get_range(self):
-    return self.range
+    def get_range(self):
+        return self._range
 
-range = property(get_range)
+    range = property(get_range)
 
-def get_rate(self):
-    return self.rate
+    def get_rate(self):
+        return self._rate
 
-rate = property(get_rate)
+    rate = property(get_rate)

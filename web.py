@@ -45,15 +45,23 @@ def xdm1241Config(type: Annotated[str, Path(title="type: voltdc,voltac,currdc,cu
     return xdm1241.configure(type,range,rate)
 
 @app.get("/xdm1241/measure")
-async def xdm1241measure(): 
+def xdm1241measure(): 
     return xdm1241.measure()
 
 @app.get("/xdm1241/type")
-async def xdm1241type(): 
-    return xdm1241.type()
+def xdm1241type(): 
+    return xdm1241.type
+
+@app.get("/xdm1241/range")
+def xdm1241range(): 
+    return xdm1241.range
+
+@app.get("/xdm1241/rate")
+def xdm1241rate(): 
+    return xdm1241.rate
 
 @app.get("/xdm1241/isConnected")
-async def xdm1241isConnected(): 
+def xdm1241isConnected(): 
     return xdm1241.isConnected()
 
 
