@@ -10,26 +10,28 @@ class Xdm1241:
     _xdm1241 = None
     _range = ''
     _rate = ''
+    _quiet = True
 
-    def __init__(self):
+    def __init__(self,quiet=True):
         self.rm = pyvisa.ResourceManager('@py')
+        self._quiet = quiet
 
     def connect(self):
         # Look for the _xdm1241 device among the resources
         self._xdm1241=None
-        print(self.rm.list_resources())
+        not self._quiet and  print(self.rm.list_resources())
         for resource in self.rm.list_resources('^ASRL/dev/ttyUSB'):
             name  = resource
-            print("Resource name:",name)
+            not self._quiet and print("Resource name:",name)
             try:
                 resourceRef= self.rm.open_resource(name,baud_rate=115200)
                 resourceId = resourceRef.query('*IDN?')
-                print("ResourseRef:",resourceRef," ResourceId:",resourceId)
+                not self._quiet and print("ResourseRef:",resourceRef," ResourceId:",resourceId)
                 if "XDM1241" in resourceId:
                     self._xdm1241 = resourceRef
                     break
             except Exception as inst:
-                print(inst)
+                not self._quiet and print(inst)
                 pass
         return  self.isConnected()
 
@@ -38,7 +40,7 @@ class Xdm1241:
         self._range = ''
         self._rate = ''
         if not self.isConnected():
-            print("Connect to _xdm1241")
+            not self._quiet and print("Connect to _xdm1241")
             self.connect()
         if self.isConnected():
             # Build configCmduration string
@@ -119,7 +121,7 @@ class Xdm1241:
                 configCmd += "FREQ"
             elif type ==  "temp" :
                 configCmd += "TEMP"
-            print(configCmd)
+            not self._quiet and print("configCmd:",configCmd)
             # Also build the _rate command
             rateCmd = "RATE "
             if rate== 1 :
@@ -148,28 +150,28 @@ class Xdm1241:
                     self._rate = rate
                     return True
             except OSError:
-                print("_xdm1241 oserror")
+                not self._quiet and print("_xdm1241 oserror")
                 self._xdm1241=None
                 return False
         else:
-            print("No _xdm1241 found")
+            not self._quiet and print("No _xdm1241 found")
             return False
 
 
     def measure(self): 
         if not self.isConnected():
-            # print("Connect to _xdm1241")
+            not self._quiet and  print("Connect to _xdm1241")
             self.connect()
         if self.isConnected():
             try:
                 result = self._xdm1241.query('MEAS1?')
                 return{result}
             except OSError:
-                print("_xdm1241 oserror")
+                not self._quiet and print("_xdm1241 oserror")
                 self._xdm1241 = None
                 return{False}
         else:
-            print("No _xdm1241 found")
+            not self._quiet and print("No _xdm1241 found")
             return(False)
 
     def isConnected(self):

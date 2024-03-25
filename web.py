@@ -32,7 +32,7 @@ app.add_middleware(
 )
 
 # Make a xdm1241 object
-xdm1241 = Xdm1241()
+xdm1241 = Xdm1241(quiet=False)
 
 @app.get("/xdm1241/connect")
 def xdm1241Connect():
