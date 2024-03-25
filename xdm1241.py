@@ -170,7 +170,7 @@ class Xdm1241:
             return(False)
 
     def isConnected(self):
-        if self._xdm1421:
+        if self._xdm1241:
             return True
         else: 
             return False
