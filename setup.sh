@@ -54,7 +54,7 @@ echo 6. Install fastapi for web services and a ASGI web server
 pip install fastapi
 pip install "uvicorn[standard]"
 # Note: I run uvicorn using this command during development
-# uvicorn web:app --reload --host pimidi.home
+# uvicorn web:app --reload --host scpipi.local
 
 
 

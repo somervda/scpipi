@@ -2,6 +2,8 @@
 
 import time
 import pyvisa
+import math
+
 class Xdm1241:
     # owon _xdm1241 services
     #  See https://files.owon.com.cn/software/Application/XDM1000_Digital_Multimeter_Programming_Manual.pdf 
@@ -31,6 +33,9 @@ class Xdm1241:
                 not self._quiet and print("ResourseRef:",resourceRef," ResourceId:",resourceId)
                 if "XDM1241" in resourceId:
                     self._xdm1241 = resourceRef
+                    # Set to default configuration
+                    time.sleep(.5)
+                    self.congigure("voltdc",0,0)
                     break
             except Exception as inst:
                 not self._quiet and print(inst)
@@ -169,7 +174,10 @@ class Xdm1241:
         if self.isConnected():
             try:
                 result = self._xdm1241.query('MEAS1?')
-                return{result}
+                # Strip cr and lf from return value
+                value = result.replace('\r','').replace('\n','')
+                self.getPanelMeasure(value)
+                return{value}
             except OSError:
                 not self._quiet and print("_xdm1241 oserror")
                 self._xdm1241 = None
@@ -184,21 +192,52 @@ class Xdm1241:
             return True
         else: 
             return False
+    
+    def getPanelMeasure(self,measure):
+        # Convert an scientific notation based value
+        # into something to display on the led panel
+        value = measure.split('E')
+        mantisa = float(value[0])
+        exp = int(value[1])
+        print(mantisa,exp)
+        # Work out scaling to show on pannel i.e. micro, milli, killo, mega
+        scale = ""
+        if exp< -6:
+            scale = "micro"
+            expAdj = exp - -6
+            disp = mantisa * (10**expAdj)
+        elif exp< -3:
+            scale = "milli"
+            expAdj = exp - -3
+            disp = mantisa * (10**expAdj)
+        elif exp>= 6:
+            scale = "mega"
+            expAdj = exp - 6
+            disp = mantisa * (10**expAdj)
+        elif exp>= 3:
+            scale = "killo"
+            expAdj = exp - 3
+            disp = mantisa * (10**expAdj)
+        else:
+            scale = ""
+            expAdj = exp 
+            disp = mantisa * (10**expAdj)    
+        print(scale,disp)  
+        pass
+
+    # Getters
 
     def get_type(self):
         not self._quiet and print("get_type")
         return self._type
-
     type = property(get_type)
 
     def get_range(self):
         not self._quiet and print("get_range")
         return self._range
-
     range = property(get_range)
 
     def get_rate(self):
         not self._quiet and print("get_rate")
         return self._rate
-
     rate = property(get_rate)
