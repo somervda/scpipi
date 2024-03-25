@@ -3,38 +3,42 @@
 import time
 import pyvisa
 class Xdm1241:
-    # owon xpm1241 services
+    # owon xdm1241 services
     #  See https://files.owon.com.cn/software/Application/XDM1000_Digital_Multimeter_Programming_Manual.pdf 
     # for scpi commands
 
     def __init__(self):
         self.rm = pyvisa.ResourceManager('@py')
+        self.type = None
+        self.range=None
+        self.rate=None
         print(self.rm.list_resources())
-        self.xpm1241 = None
+        self.xdm1241 = None
     
 
     def connect(self):
-        # Look for the xpm1241 device among the resources
-        self.xpm1241=None
+        # Look for the xdm1241 device among the resources
+        self.xdm1241=None
         for resource in self.rm.list_resources('^ASRL/dev/ttyUSB'):
             name  = resource
             try:
                 resourceRef= self.rm.open_resource(name,baud_rate=115200)
                 if "XDM1241" in resourceRef.query('*IDN?'):
                     print("resourceRef:",resourceRef,"name:",name)
-                    self.xpm1241 = resourceRef
+                    self.xdm1241 = resourceRef
+                    break
             except:
                 pass
-        if self.xpm1241:
-            return True
-        else:
-            return False
+        return  self.isConnected()
 
     def configure(self,type, range,rate):
-        if not self.xpm1241:
-            # print("Connect to xpm1241")
+        self.type = None
+        self.range = None
+        self.rate =None
+        if not self.isConnected():
+            # print("Connect to xdm1241")
             self.connect()
-        if self.xpm1241:
+        if self.isConnected():
             # Build configCmduration string
             configCmd = "CONFigure:"
             if type== "voltdc" :
@@ -125,40 +129,64 @@ class Xdm1241:
 
             try:
                 # Set rate,type and range
-                result= self.xpm1241.write(rateCmd)
+                result= self.xdm1241.write(rateCmd)
                 time.sleep(.1)
-                result= self.xpm1241.write(configCmd)
+                result= self.xdm1241.write(configCmd)
                 time.sleep(.1)
                 try:
                     # Check we are really connected 
                     # by doing a dummy query
-                    testResult = self.xpm1241.query('MEAS1?')
+                    testResult = self.xdm1241.query('MEAS1?')
                 except:
-                    self.xpm1241 = None
+                    self.xdm1241=None
                     return False
                 else:
+                    self.type = type
+                    self.range = range
+                    self.rate = rate
                     return True
             except OSError:
-                # print("xpm1241 oserror")
-                self.xpm1241 = None
+                # print("xdm1241 oserror")
+                self.xdm1241=None
                 return False
         else:
-            print("No xpm1241 found")
+            print("No xdm1241 found")
             return False
 
 
     def measure(self): 
-        if not self.xpm1241:
-            # print("Connect to xpm1241")
+        if not self.isConnected():
+            # print("Connect to xdm1241")
             self.connect()
-        if self.xpm1241:
+        if self.isConnected():
             try:
-                result = self.xpm1241.query('MEAS1?')
+                result = self.xdm1241.query('MEAS1?')
                 return{result}
             except OSError:
-                # print("xpm1241 oserror")
-                self.xpm1241 = None
+                # print("xdm1241 oserror")
+                self.xdm1241 = None
                 return{False}
         else:
-            # print("No xpm1241 found")
+            # print("No xdm1241 found")
             return(False)
+
+def isConnected(self):
+    if self.xdm1421 :
+        return True
+    else: 
+        return False
+
+def get_type(self):
+    return self.type
+
+type = property(get_type)
+
+def get_range(self):
+    return self.range
+
+range = property(get_range)
+
+def get_rate(self):
+    return self.rate
+
+rate = property(get_rate)

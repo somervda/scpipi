@@ -18,7 +18,7 @@ from fastapi import FastAPI,Path
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
-from xpm1241 import Xpm1241
+from xdm1241 import Xdm1241
 
 
 app = FastAPI()
@@ -31,22 +31,30 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Make a xpm1241 object
-xpm1241 = Xpm1241()
+# Make a xdm1241 object
+xdm1241 = Xdm1241()
 
-@app.get("/xpm1241/connect")
-def xpm1241Connect():
-    return xpm1241.connect()
+@app.get("/xdm1241/connect")
+def xdm1241Connect():
+    return xdm1241.connect()
 
-@app.get("/xpm1241/config/{type}/{range}/{rate}")
-def xpm1241Config(type: Annotated[str, Path(title="type: voltdc,voltac,currdc,currac,res,temp")],
+@app.get("/xdm1241/config/{type}/{range}/{rate}")
+def xdm1241Config(type: Annotated[str, Path(title="type: voltdc,voltac,currdc,currac,res,temp")],
     range: Annotated[int, Path(title="range: auto=0  or 1-9 for specific range (see programming manual)")], 
     rate: Annotated[int, Path(title="rate: (0=Slow, 1=Medium 2=Fast)")]):
-    return xpm1241.configure(type,range,rate)
+    return xdm1241.configure(type,range,rate)
 
-@app.get("/xpm1241/measure")
-async def xpm1241measure(): 
-    return xpm1241.measure()
+@app.get("/xdm1241/measure")
+async def xdm1241measure(): 
+    return xdm1241.measure()
+
+@app.get("/xdm1241/type")
+async def xdm1241type(): 
+    return xdm1241.type()
+
+@app.get("/xdm1241/isConnected")
+async def xdm1241isConnected(): 
+    return xdm1241.isConnected()
 
 
 # Note: Make sure this line is at the end of the file so fastAPI falls through the other
