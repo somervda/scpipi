@@ -13,20 +13,23 @@ class Xdm1241:
 
     def __init__(self):
         self.rm = pyvisa.ResourceManager('@py')
-        print(self.rm.list_resources())
 
     def connect(self):
         # Look for the _xdm1241 device among the resources
         self._xdm1241=None
+        print(self.rm.list_resources())
         for resource in self.rm.list_resources('^ASRL/dev/ttyUSB'):
             name  = resource
+            print("Resource name:",name)
             try:
-                resourceRef= self.rm.open_resource(name,baud__rate=115200)
-                if "XDM1241" in resourceRef.query('*IDN?'):
-                    print("resourceRef:",resourceRef,"name:",name)
+                resourceRef= self.rm.open_resource(name,baud_rate=115200)
+                resourceId = resourceRef.query('*IDN?')
+                print("ResourseRef:",resourceRef," ResourceId:",resourceId)
+                if "XDM1241" in resourceId:
                     self._xdm1241 = resourceRef
                     break
-            except:
+            except Exception as inst:
+                print(inst)
                 pass
         return  self.isConnected()
 
@@ -35,7 +38,7 @@ class Xdm1241:
         self._range = ''
         self._rate = ''
         if not self.isConnected():
-            # print("Connect to _xdm1241")
+            print("Connect to _xdm1241")
             self.connect()
         if self.isConnected():
             # Build configCmduration string
@@ -145,7 +148,7 @@ class Xdm1241:
                     self._rate = rate
                     return True
             except OSError:
-                # print("_xdm1241 oserror")
+                print("_xdm1241 oserror")
                 self._xdm1241=None
                 return False
         else:
@@ -162,11 +165,11 @@ class Xdm1241:
                 result = self._xdm1241.query('MEAS1?')
                 return{result}
             except OSError:
-                # print("_xdm1241 oserror")
+                print("_xdm1241 oserror")
                 self._xdm1241 = None
                 return{False}
         else:
-            # print("No _xdm1241 found")
+            print("No _xdm1241 found")
             return(False)
 
     def isConnected(self):
