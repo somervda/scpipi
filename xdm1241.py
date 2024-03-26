@@ -176,7 +176,7 @@ class Xdm1241:
                 result = self._xdm1241.query('MEAS1?')
                 # Strip cr and lf from return value
                 value = result.replace('\r','').replace('\n','')
-                return{self.getPanelMeasure(value)}
+                return self.getPanelInfo(value)
             except OSError:
                 not self._quiet and print("_xdm1241 oserror")
                 self._xdm1241 = None
@@ -192,7 +192,7 @@ class Xdm1241:
         else: 
             return False
     
-    def getPanelMeasure(self,measure):
+    def getPanelInfo(self,measure):
         # Convert an scientific notation based value
         # into something to display on the led panel
         value = measure.split('E')
@@ -239,7 +239,12 @@ class Xdm1241:
 
         subText = scale + shortType
         print(measure,value,disp,mainText,subText)
-        return (measure,mainText,subText)
+        measureInfo = {}
+        measureInfo["value"] = measure
+        measureInfo["mainText"] = mainText
+        measureInfo["subText"] = subText
+        print("measureInfo:",measureInfo)
+        return (measureInfo)
 
     # Getters
 

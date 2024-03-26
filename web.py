@@ -44,9 +44,12 @@ def xdm1241Config(type: Annotated[str, Path(title="type: voltdc,voltac,currdc,cu
     rate: Annotated[int, Path(title="rate: (0=Slow, 1=Medium 2=Fast)")]):
     return xdm1241.configure(type,range,rate)
 
+
 @app.get("/xdm1241/measure")
 def xdm1241measure(): 
     return xdm1241.measure()
+
+
 
 @app.get("/xdm1241/type")
 def xdm1241type(): 
