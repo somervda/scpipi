@@ -176,8 +176,7 @@ class Xdm1241:
                 result = self._xdm1241.query('MEAS1?')
                 # Strip cr and lf from return value
                 value = result.replace('\r','').replace('\n','')
-                self.getPanelMeasure(value)
-                return{value}
+                return{self.getPanelMeasure(value)}
             except OSError:
                 not self._quiet and print("_xdm1241 oserror")
                 self._xdm1241 = None
@@ -215,15 +214,32 @@ class Xdm1241:
             expAdj = exp - 6
             disp = mantisa * (10**expAdj)
         elif exp>= 3:
-            scale = "K"
+            scale = "k"
             expAdj = exp - 3
             disp = mantisa * (10**expAdj)
         else:
             scale = ""
             expAdj = exp 
             disp = mantisa * (10**expAdj)    
-        print(scale,disp,"\u03A9")  
-        pass
+        
+        mainText = str(disp)[0:6]
+        shortType = ""
+        if self._type == "voltdc":
+            shortType = "VDC"
+        elif self._type == "voltac":
+            shortType = "VAC"
+        elif self._type == "currdc":
+            shortType = "ADC"
+        elif self._type == "res":
+            shortType = "\u03A9"
+        elif self._type == "freq":
+            shortType = "Hz"
+        elif self._type == "temp":
+            shortType = "\u00B0C"
+
+        subText = scale + shortType
+        print(measure,value,disp,mainText,subText)
+        return (measure,mainText,subText)
 
     # Getters
 
