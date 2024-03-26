@@ -203,26 +203,26 @@ class Xdm1241:
         # Work out scaling to show on pannel i.e. micro, milli, killo, mega
         scale = ""
         if exp< -6:
-            scale = "micro"
+            scale = "\u03BC"
             expAdj = exp - -6
             disp = mantisa * (10**expAdj)
         elif exp< -3:
-            scale = "milli"
+            scale = "m"
             expAdj = exp - -3
             disp = mantisa * (10**expAdj)
         elif exp>= 6:
-            scale = "mega"
+            scale = "M"
             expAdj = exp - 6
             disp = mantisa * (10**expAdj)
         elif exp>= 3:
-            scale = "killo"
+            scale = "K"
             expAdj = exp - 3
             disp = mantisa * (10**expAdj)
         else:
             scale = ""
             expAdj = exp 
             disp = mantisa * (10**expAdj)    
-        print(scale,disp)  
+        print(scale,disp,"\u03A9")  
         pass
 
     # Getters
