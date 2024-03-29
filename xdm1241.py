@@ -125,6 +125,24 @@ class Xdm1241:
                     configCmd += " 50E6"
                 else:
                     configCmd += " AUTO"
+            elif type ==   "cap" :
+                configCmd += "CAP"
+                if range == 1:
+                    configCmd += " 50E-9"
+                elif range == 2:
+                    configCmd += " 500E-9"
+                elif range == 3:
+                    configCmd += " 5E-6"
+                elif range == 4:
+                    configCmd += " 50E-6"
+                elif range == 5:
+                    configCmd += " 500E-6"
+                elif range == 6:
+                    configCmd += " 5E-3"
+                elif range == 7:
+                    configCmd += " 50E-3"
+                else:
+                    configCmd += " AUTO"
             elif type ==  "freq" :
                 configCmd += "FREQ"
             elif type ==  "temp" :
@@ -166,24 +184,57 @@ class Xdm1241:
             return False
 
 
+    def measureShow(self):
+        # Returns process version of measure
+        # and supporting information 
+        not self._quiet and print("measureShow")
+        if not self.isConnected():
+            not self._quiet and  print("Connect to _xdm1241")
+            self.connect()
+        if self.isConnected():
+            try:
+                self._xdm1241.encoding="euc_cn"
+                measure = self._xdm1241.query('MEAS1:SHOW?').replace('\r','').replace('\n','')
+                not self._quiet and print("measure:",measure)
+                # Strip cr and lf from return value
+                return self.processMeasurement(measure)
+            except Exception as e:
+                not self._quiet and print("_xdm1241 measure error", e)
+                self._xdm1241 = None
+                measureInfo = {}
+                measureInfo["success"] = False
+                return measureInfo
+        else:
+            not self._quiet and print("No _xdm1241 found")
+            measureInfo = {}
+            measureInfo["success"] = False
+            return measureInfo
+
     def measure(self): 
+        # Return measure as a float
         not self._quiet and print("measure")
         if not self.isConnected():
             not self._quiet and  print("Connect to _xdm1241")
             self.connect()
         if self.isConnected():
             try:
-                result = self._xdm1241.query('MEAS1?')
-                # Strip cr and lf from return value
-                value = result.replace('\r','').replace('\n','')
-                return self.getPanelInfo(value)
-            except OSError:
-                not self._quiet and print("_xdm1241 oserror")
+                measure = float(self._xdm1241.query('MEAS?').replace('\r','').replace('\n',''))
+                not self._quiet and print("measure:",measure)
+                measureInfo = {}
+                measureInfo["success"] = True
+                measureInfo["measure"] = measure
+                return measureInfo
+            except Exception as e:
+                not self._quiet and print("_xdm1241 measure error", e)
                 self._xdm1241 = None
-                return{False}
+                measureInfo = {}
+                measureInfo["success"] = False
+                return measureInfo
         else:
             not self._quiet and print("No _xdm1241 found")
-            return(False)
+            measureInfo = {}
+            measureInfo["success"] = False
+            return measureInfo
 
     def isConnected(self):
         not self._quiet and print("isConnected")
@@ -192,58 +243,57 @@ class Xdm1241:
         else: 
             return False
     
-    def getPanelInfo(self,measure):
-        # Convert an scientific notation based value
-        # into something to display on the led panel
-        value = measure.split('E')
-        mantisa = float(value[0])
-        exp = int(value[1])
-        print(mantisa,exp)
-        # Work out scaling to show on pannel i.e. micro, milli, killo, mega
-        scale = ""
-        if exp< -6:
-            scale = "\u03BC"
-            expAdj = exp - -6
-            disp = mantisa * (10**expAdj)
-        elif exp< -3:
-            scale = "m"
-            expAdj = exp - -3
-            disp = mantisa * (10**expAdj)
-        elif exp>= 6:
-            scale = "M"
-            expAdj = exp - 6
-            disp = mantisa * (10**expAdj)
-        elif exp>= 3:
-            scale = "k"
-            expAdj = exp - 3
-            disp = mantisa * (10**expAdj)
+    def processMeasurement(self,measure):
+        # Pull apart the returned measurement
+        # Owons chinese encoding of degree and ohm symbols is
+        # weird so some special processing of those
+        mainText = ''
+        subText = ''
+        # Deal with special charactrers first
+        if ord(measure[-1]) == 8451 :
+            # Special case , ends with degrees centergrade
+            self._type = "temp"
+            mainText = measure[0:len(measure) - 1]
+            subText = "\u00B0C"
+        elif ord(measure[-1]) == 937 :
+            # Deal with ohms symbol
+            self._type = 'res'
+            for n in range(0,(len(measure) -1 )):
+                testChar = measure[n] 
+                if not (testChar.isnumeric() or testChar =='.' or testChar =='-') :
+                    mainText = measure[0:n] 
+                    subText = measure[n:]
+                    break
         else:
-            scale = ""
-            expAdj = exp 
-            disp = mantisa * (10**expAdj)    
-        
-        mainText = str(disp)[0:6]
-        shortType = ""
-        if self._type == "voltdc":
-            shortType = "VDC"
-        elif self._type == "voltac":
-            shortType = "VAC"
-        elif self._type == "currdc":
-            shortType = "ADC"
-        elif self._type == "res":
-            shortType = "\u03A9"
-        elif self._type == "freq":
-            shortType = "Hz"
-        elif self._type == "temp":
-            shortType = "\u00B0C"
-
-        subText = scale + shortType
-        print(measure,value,disp,mainText,subText)
+            # Other measurements don't need any tricks to process
+            if "VDC" in measure:
+                self._type = "voltdc"
+            elif "VAC" in measure:
+                self._type = "voltac"
+            elif "ADC" in measure:
+                self._type = "currdc"
+            elif "AAC" in measure:
+                self._type = "currac"
+            elif "Hz" in measure:
+                self._type = "freq"
+            elif "F" in measure:
+                self._type = "cap"
+            for n in range(0,(len(measure) -1 )):
+                testChar = measure[n] 
+                if not (testChar.isnumeric() or testChar =='.' or testChar =='-') :
+                    mainText = measure[0:n] 
+                    subText = measure[n:]
+                    break
+        not self._quiet and print(measure," type:",self._type," mainText:",mainText," subText:",subText)
         measureInfo = {}
+        measureInfo["success"] = True
         measureInfo["value"] = measure
         measureInfo["mainText"] = mainText
         measureInfo["subText"] = subText
-        print("measureInfo:",measureInfo)
+        measureInfo["type"] = self._type
+        measureInfo["range"] = self._range
+        measureInfo["rate"] = self._rate
+        not self._quiet and print("measureInfo:",measureInfo)
         return (measureInfo)
 
     # Getters

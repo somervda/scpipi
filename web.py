@@ -45,6 +45,10 @@ def xdm1241Config(type: Annotated[str, Path(title="type: voltdc,voltac,currdc,cu
     return xdm1241.configure(type,range,rate)
 
 
+@app.get("/xdm1241/measureShow")
+def xdm1241measure(): 
+    return xdm1241.measureShow()
+
 @app.get("/xdm1241/measure")
 def xdm1241measure(): 
     return xdm1241.measure()
