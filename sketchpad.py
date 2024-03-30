@@ -79,7 +79,7 @@ if xpm1241 != None:
 #     time.sleep(5)
 
 r = rm.open_resource('TCPIP::sds1052.home::INSTR')
-print(r.query('*IDN?'))
+print("sds1052:",r.query('*IDN?'))
 # print("set ASET")
 # r.write('ASET')
 # time.sleep(5)
