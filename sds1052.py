@@ -45,14 +45,23 @@ class Sds1052:
             return False
 
     def measure(self,type): 
-        # Return requested measurement type as a float
+        # Return requested measurement type from wave on channel 1 as a float
+        # Typical measutement types are RMS,PKPK,FREQ,MIN,MAX,PHA
+        # PHA is special , it uses the command below to get phase difference
+        # between waves on channel and 2
+        # MEAD PHA,C1-C2  (Phase between C1 and C2)
         not self._quiet and print("measure")
         if not self.isConnected():
             not self._quiet and  print("Connect to _sds1052")
             self.connect()
         if self.isConnected():
             try:
-                measure = float(self._sds1052.query(r.query('C1:PAVA? ' + type).replace('\r','').replace('\n',''))
+                measure=0
+                if type=="PHA":
+                    # May be a bit more to it than this....
+                    measure = float(self._sds1052.query(r.query('MEAD PHA,C1-C2? ').replace('\r','').replace('\n',''))
+                else:
+                    measure = float(self._sds1052.query(r.query('C1:PAVA? ' + type).replace('\r','').replace('\n',''))
                 not self._quiet and print("measure:",measure)
                 measureInfo = {}
                 measureInfo["success"] = True
