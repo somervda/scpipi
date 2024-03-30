@@ -18,7 +18,8 @@ assert o.isConnected() == True , "xdm1241 should be connected"
 
 assert o.configure("voltdc",0,0) == True , "xdm1241 configure should work"
 
-assert o.measure() != False , "xdm1241 measure should work"
+assert o.measure()["success"] == True , "xdm1241 measure should work"
+assert o.measureShow()["success"] == True , "xdm1241 measureShow should work"
 
 assert o.type == "voltdc" , "type should be voltdc"
 assert o.range == 0 , "range should be 0"
