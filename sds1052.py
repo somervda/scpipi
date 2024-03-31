@@ -17,24 +17,24 @@ class Sds1052:
         self._quiet = quiet
         not self._quiet and print("__init__")
         self.rm = pyvisa.ResourceManager('@py')
+        not self._quiet and print(self.rm.list_resources())
 
     def connect(self):
         not self._quiet and print("connect")
         # Open the sds1052 device 
         # Its a tcpIP interface so connection to host either works or it doesnt
-        resource=rm.open_resource('TCPIP::sds1052.home::INSTR')
         try:
-
+            resource=self.rm.open_resource('TCPIP::sds1052.home::INSTR')
+            time.sleep(.5)
             # Test by sending first channel on command
-            resourceId = self._sds1052.query('*IDN?')
+            resourceId = resource.query('*IDN?')
             not self._quiet and print(" ResourceId:",resourceId)
             if "SDS1052DL+" in resourceId:
                 not self._quiet and print("sds1052 found:",resource)
                 self._sds1052 = resource
-                break
         except Exception as inst:
             not self._quiet and print(inst)
-        return isConnected()
+        return self.isConnected()
 
 
     def isConnected(self):
@@ -59,16 +59,16 @@ class Sds1052:
                 measure=0
                 if type=="PHA":
                     # May be a bit more to it than this....
-                    measure = float(self._sds1052.query(r.query('MEAD PHA,C1-C2? ').replace('\r','').replace('\n',''))
+                    measure = self._sds1052.query('MEAD PHA,C1-C2? ').replace('\r','').replace('\n','')
                 else:
-                    measure = float(self._sds1052.query(r.query('C1:PAVA? ' + type).replace('\r','').replace('\n',''))
+                    measure = self._sds1052.query('C1:PAVA? ' + type).replace('\r','').replace('\n','')
                 not self._quiet and print("measure:",measure)
                 measureInfo = {}
                 measureInfo["success"] = True
-                measureInfo["measure"] = measure
+                measureInfo["measure"] = self.processMeasure(measure,type)
                 return measureInfo
             except Exception as e:
-                not self._quiet and print("_sds1052 measure error", e)
+                not self._quiet and print("sds1052 measure error", e)
                 self._sds1052 = None
                 measureInfo = {}
                 measureInfo["success"] = False
@@ -78,3 +78,22 @@ class Sds1052:
             measureInfo = {}
             measureInfo["success"] = False
             return measureInfo
+
+    def processMeasure(self,measure,type):
+        not self._quiet and print("processMeasure",measure,type)
+        # Pull out the actual measurement value as a float
+        #  i.e. C1:PAVA RMS,1.76E+00V -> 1.76
+        measureParts = measure.split(',')
+        not self._quiet and print("measure:",measure, " measureParts:",measureParts)
+        if len(measureParts)==2:
+            # Process the second part of the measure
+            measureCore = ""
+            if type=="FREQ":
+                measureCore = measureParts[1].replace('Hz','')
+            else:
+                measureCore = measureParts[1][:-1]
+            not self._quiet and print("measureCore:",measureCore)
+            return float(measureCore)
+        else:
+            return -1
+

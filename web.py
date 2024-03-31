@@ -20,6 +20,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from xdm1241 import Xdm1241
 from jds6600 import Jds6600
+from sds1052 import Sds1052
 
 
 app = FastAPI()
@@ -71,7 +72,7 @@ def xdm1241rate():
 def xdm1241isConnected(): 
     return xdm1241.isConnected()
 
-# *** jds6600 signal generator web services
+# *** jds6600 signal generator web services  *****
 
 jds6600 = Jds6600(quiet=True)
 
@@ -88,6 +89,22 @@ def xdm1241Config(freq: Annotated[float, Path(title="frequency in Hz , max 30MHz
     level: Annotated[float, Path(title="Output level in volts")], 
     wave: Annotated[int, Path(title="waveform (0=sine,1=square etc)")]):
     return jds6600.configure(freq,level,wave)
+
+# *** sds1052+ Oscilloscope web services  *****
+
+sds1052 = Sds1052(quiet=True)
+
+@app.get("/sds1052/connect")
+def sds1052Connect():
+    return sds1052.connect()
+
+@app.get("/sds1052/isConnected")
+def sds1052isConnected(): 
+    return sds1052.isConnected()
+
+@app.get("/sds1052/measure/{type}")
+def sds1052Measure(type: Annotated[str, Path(title="Measurement type i.e. RMS, PKPK, FREQ,PHA")]):
+    return sds1052.measure(type)
 
 # Note: Make sure this line is at the end of the file so fastAPI falls through the other
 # routes before serving up static files 
