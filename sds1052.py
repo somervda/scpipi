@@ -66,6 +66,22 @@ class Sds1052:
                 measureInfo = {}
                 measureInfo["success"] = True
                 measureInfo["measure"] = self.processMeasure(measure,type)
+                measureInfo["type"] = type
+                measureInfo["mainText"] = str(measureInfo["measure"])
+                volts=["PKPK","MIN","MAX","AMPL","MEAN"]
+                seconds=["RISE","FALL"]
+                hertz=["FREQ"]
+                degrees=["PHA"]
+                subText = ""
+                if type in volts:
+                    subText="Volts"
+                elif type in seconds:
+                    subText-"Seconds"
+                elif type in hertz:
+                    subText="Hz"
+                elif type in degrees:
+                    subText="Degrees"
+                measureInfo["subText"]=subText + " [" + type + "]"
                 return measureInfo
             except Exception as e:
                 not self._quiet and print("sds1052 measure error", e)
