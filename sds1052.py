@@ -25,7 +25,7 @@ class Sds1052:
         # Its a tcpIP interface so connection to host either works or it doesnt
         try:
             resource=self.rm.open_resource('TCPIP::sds1052.home::INSTR')
-            time.sleep(.5)
+            time.sleep(1)
             # Test by sending first channel on command
             resourceId = resource.query('*IDN?')
             not self._quiet and print(" ResourceId:",resourceId)
@@ -59,7 +59,7 @@ class Sds1052:
                 measure=0
                 if type=="PHA":
                     # May be a bit more to it than this....
-                    measure = self._sds1052.query('MEAD PHA,C1-C2? ').replace('\r','').replace('\n','')
+                    measure = self._sds1052.query('C1-C2:MEAD? PHA').replace('\r','').replace('\n','')
                 else:
                     measure = self._sds1052.query('C1:PAVA? ' + type).replace('\r','').replace('\n','')
                 not self._quiet and print("measure:",measure)
@@ -90,6 +90,8 @@ class Sds1052:
             measureCore = ""
             if type=="FREQ":
                 measureCore = measureParts[1].replace('Hz','')
+            elif type=="PHA":
+                measureCore = measureParts[1].replace('degree','')
             else:
                 measureCore = measureParts[1][:-1]
             not self._quiet and print("measureCore:",measureCore)
