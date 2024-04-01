@@ -3,6 +3,7 @@
 import time
 import pyvisa
 import math
+import traceback
 
 class Sds1052:
     # Sds1052 Oscilloscope services
@@ -64,10 +65,15 @@ class Sds1052:
                     measure = self._sds1052.query('C1:PAVA? ' + type).replace('\r','').replace('\n','')
                 not self._quiet and print("measure:",measure)
                 measureInfo = {}
+                prefix = ""
                 measureInfo["success"] = True
                 measureInfo["measure"] = self.processMeasure(measure,type)
                 measureInfo["type"] = type
-                measureInfo["mainText"] = str(measureInfo["measure"])
+                if measureInfo["measure"] < 0.001:
+                    measureInfo["mainText"] = str(measureInfo["measure"] * 1000)[0:6]
+                    prefix="milli-"
+                else:
+                    measureInfo["mainText"] = str(measureInfo["measure"])
                 volts=["PKPK","MIN","MAX","AMPL","MEAN"]
                 seconds=["RISE","FALL"]
                 hertz=["FREQ"]
@@ -76,15 +82,15 @@ class Sds1052:
                 if type in volts:
                     subText="Volts"
                 elif type in seconds:
-                    subText-"Seconds"
+                    subText="Seconds"
                 elif type in hertz:
                     subText="Hz"
                 elif type in degrees:
                     subText="Degrees"
-                measureInfo["subText"]=subText + " [" + type + "]"
+                measureInfo["subText"]=prefix + subText + " [" + type + "]"
                 return measureInfo
             except Exception as e:
-                not self._quiet and print("sds1052 measure error", e)
+                not self._quiet and print("sds1052 measure error", e,traceback.format_exc())
                 self._sds1052 = None
                 measureInfo = {}
                 measureInfo["success"] = False
