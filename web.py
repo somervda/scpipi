@@ -21,6 +21,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from xdm1241 import Xdm1241
 from jds6600 import Jds6600
 from sds1052 import Sds1052
+from dho804 import Dho804
 
 
 app = FastAPI()
@@ -105,6 +106,22 @@ def sds1052isConnected():
 @app.get("/sds1052/measure/{type}")
 def sds1052Measure(type: Annotated[str, Path(title="Measurement type i.e. RMS, PKPK, FREQ,PHA")]):
     return sds1052.measure(type)
+
+# *** dho804 Oscilloscope web services  *****
+
+dho804 = Dho804(quiet=False)
+
+@app.get("/dho804/connect")
+def dho804Connect():
+    return dho804.connect()
+
+@app.get("/dho804/isConnected")
+def dho804isConnected(): 
+    return dho804.isConnected()
+
+@app.get("/dho804/measure/{type}")
+def dho804Measure(type: Annotated[str, Path(title="Measurement type i.e. VRMS, VPPK, FREQ,RPH")]):
+    return dho804.measure(type)
 
 # Note: Make sure this line is at the end of the file so fastAPI falls through the other
 # routes before serving up static files 

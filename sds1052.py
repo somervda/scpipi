@@ -69,12 +69,12 @@ class Sds1052:
                 measureInfo["success"] = True
                 measureInfo["measure"] = self.processMeasure(measure,type)
                 measureInfo["type"] = type
-                if measureInfo["measure"] < 0.001:
+                if abs(measureInfo["measure"]) < 0.001:
                     measureInfo["mainText"] = str(measureInfo["measure"] * 1000)[0:6]
                     prefix="milli-"
                 else:
                     measureInfo["mainText"] = str(measureInfo["measure"])
-                volts=["PKPK","MIN","MAX","AMPL","MEAN"]
+                volts=["PKPK","MIN","MAX","AMPL","MEAN","RMS"]
                 seconds=["RISE","FALL"]
                 hertz=["FREQ"]
                 degrees=["PHA"]
