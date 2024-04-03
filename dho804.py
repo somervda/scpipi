@@ -80,7 +80,7 @@ class Dho804:
                     measureInfo["mainText"] = str(measureInfo["measure"] * 1000)[0:6]
                     prefix="milli-"
                 else:
-                    measureInfo["mainText"] = str(measureInfo["measure"])
+                    measureInfo["mainText"] = str(measureInfo["measure"])[0:6]
                 volts=["VMAX","VMIN","VPP","VAMP","VAVG","VRMS"]
                 seconds=["RTIM","FTIM"]
                 hertz=["FREQ"]
