@@ -21,24 +21,28 @@ class Jds6600:
         not self._quiet and print("__init__")
         self.rm = pyvisa.ResourceManager('@py')
 
-    def connect(self):
+    def connect(self,timeout=5):
         not self._quiet and print("connect")
         # Look for the jds6600 device among the resources
 
         self._jds6600=None
         for resource in self.rm.list_resources('^ASRL/dev/ttyUSB'):
             rName  = resource
-            try:
-                r= self.rm.open_resource(rName,baud_rate=115200)
-                # Test by sending first channel on command
-                result=r.query(":w20=1,0.")
-                not self._quiet and print("Result:",result)
-                if "ok" in result:
-                    not self._quiet and print("jds6600 found:",resource)
-                    self._jds6600 = r
-                    break
-            except Exception as inst:
-                not self._quiet and print(inst)
+            timer = time.time() + timeout
+            while timer >  time.time() and not self.isConnected():
+                not self._quiet and print("Connecting...")
+                try:
+                    r= self.rm.open_resource(rName,baud_rate=115200)
+                    # Test by sending first channel on command
+                    result=r.query(":w20=1,0.")
+                    not self._quiet and print("Result:",result)
+                    if "ok" in result:
+                        not self._quiet and print("jds6600 found:",resource)
+                        self._jds6600 = r
+                        break
+                except Exception as inst:
+                    not self._quiet and print(inst)
+                timer.sleep(1)
         return  self.isConnected()
 
     def isConnected(self):

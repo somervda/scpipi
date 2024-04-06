@@ -20,21 +20,26 @@ class Sds1052:
         self.rm = pyvisa.ResourceManager('@py')
         not self._quiet and print(self.rm.list_resources())
 
-    def connect(self):
+    def connect(self,timeout=5):
         not self._quiet and print("connect")
         # Open the sds1052 device 
         # Its a tcpIP interface so connection to host either works or it doesnt
-        try:
-            resource=self.rm.open_resource('TCPIP::sds1052.home::INSTR')
+        timer = time.time() + timeout
+        while timer >  time.time() and not self.isConnected():
+            not self._quiet and print("Connecting...")
+            try:
+                resource=self.rm.open_resource('TCPIP::sds1052.home::INSTR')
+                time.sleep(1)
+                # Test by sending first channel on command
+                resourceId = resource.query('*IDN?')
+                not self._quiet and print(" ResourceId:",resourceId)
+                if "SDS1052DL+" in resourceId:
+                    not self._quiet and print("sds1052 found:",resource)
+                    self._sds1052 = resource
+                    break
+            except Exception as inst:
+                not self._quiet and print(inst)
             time.sleep(1)
-            # Test by sending first channel on command
-            resourceId = resource.query('*IDN?')
-            not self._quiet and print(" ResourceId:",resourceId)
-            if "SDS1052DL+" in resourceId:
-                not self._quiet and print("sds1052 found:",resource)
-                self._sds1052 = resource
-        except Exception as inst:
-            not self._quiet and print(inst)
         return self.isConnected()
 
 
@@ -45,7 +50,7 @@ class Sds1052:
         else: 
             return False
 
-    def measure(self,type): 
+    def measure(self,type,retry=5): 
         # Return requested measurement type from wave on channel 1 as a float
         # Typical measutement types are RMS,PKPK,FREQ,MIN,MAX,PHA
         # PHA is special , it uses the command below to get phase difference
@@ -56,50 +61,58 @@ class Sds1052:
             not self._quiet and  print("Connect to _sds1052")
             self.connect()
         if self.isConnected():
-            try:
-                measure=0
-                if type=="PHA":
-                    # May be a bit more to it than this....
-                    measure = self._sds1052.query('C1-C2:MEAD? PHA').replace('\r','').replace('\n','')
-                else:
-                    measure = self._sds1052.query('C1:PAVA? ' + type).replace('\r','').replace('\n','')
-                not self._quiet and print("measure:",measure)
-                measureInfo = {}
-                prefix = ""
-                measureInfo["success"] = True
-                measureInfo["measure"] = self.processMeasure(measure,type)
-                measureInfo["type"] = type
-                if abs(measureInfo["measure"]) < 0.001:
-                    measureInfo["mainText"] = str(measureInfo["measure"] * 1000)[0:6]
-                    prefix="milli-"
-                else:
-                    measureInfo["mainText"] = str(measureInfo["measure"])
-                volts=["PKPK","MIN","MAX","AMPL","MEAN","RMS"]
-                seconds=["RISE","FALL"]
-                hertz=["FREQ"]
-                degrees=["PHA"]
-                subText = ""
-                if type in volts:
-                    subText="Volts"
-                elif type in seconds:
-                    subText="Seconds"
-                elif type in hertz:
-                    subText="Hz"
-                elif type in degrees:
-                    subText="Degrees"
-                measureInfo["subText"]=prefix + subText + " [" + type + "]"
-                return measureInfo
-            except Exception as e:
-                not self._quiet and print("sds1052 measure error", e,traceback.format_exc())
-                self._sds1052 = None
-                measureInfo = {}
-                measureInfo["success"] = False
-                return measureInfo
-        else:
-            not self._quiet and print("No _sds1052 found")
+            retryCnt = 0
             measureInfo = {}
             measureInfo["success"] = False
-            return measureInfo
+            while retryCnt < retry:
+                # print("retryCnt:",type,retryCnt)
+                try:
+                    measure=0
+                    if type=="PHA":
+                        # May be a bit more to it than this....
+                        measure = self._sds1052.query('C1-C2:MEAD? PHA').replace('\r','').replace('\n','')
+                    else:
+                        measure = self._sds1052.query('C1:PAVA? ' + type).replace('\r','').replace('\n','')
+                    not self._quiet and print("measure:",measure)
+                    prefix = ""
+                    measureInfo["success"] = True
+                    measureInfo["measure"] = self.processMeasure(measure,type)
+                    measureInfo["type"] = type
+                    if abs(measureInfo["measure"]) < 0.001:
+                        measureInfo["mainText"] = str(measureInfo["measure"] * 1000)[0:6]
+                        prefix="milli-"
+                    else:
+                        measureInfo["mainText"] = str(measureInfo["measure"])
+                    volts=["PKPK","MIN","MAX","AMPL","MEAN","RMS"]
+                    seconds=["RISE","FALL"]
+                    hertz=["FREQ"]
+                    degrees=["PHA"]
+                    subText = ""
+                    if type in volts:
+                        subText="Volts"
+                    elif type in seconds:
+                        subText="Seconds"
+                    elif type in hertz:
+                        subText="Hz"
+                    elif type in degrees:
+                        subText="Degrees"
+                    measureInfo["subText"]=prefix + subText + " [" + type + "]"
+                    return measureInfo
+                except Exception as e:
+                    not self._quiet and print("sds1052 measure error", e,traceback.format_exc())
+                    # self._sds1052 = None
+                    # measureInfo["success"] = False
+                # If measurement failed then try an autoset and try and get the measurement again
+                try:
+                    self._sds1052.write('ASET')
+                except:
+                    pass
+                time.sleep(2)
+                retryCnt+=1
+            
+        else:
+            not self._quiet and print("No _sds1052 found")
+        return measureInfo
 
     def processMeasure(self,measure,type):
         not self._quiet and print("processMeasure",measure,type)

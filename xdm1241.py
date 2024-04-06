@@ -24,22 +24,25 @@ class Xdm1241:
         # Look for the _xdm1241 device among the resources
         self._xdm1241=None
         not self._quiet and  print(self.rm.list_resources())
-        for resource in self.rm.list_resources('^ASRL/dev/ttyUSB'):
-            name  = resource
-            not self._quiet and print("Resource name:",name)
-            try:
-                resourceRef= self.rm.open_resource(name,baud_rate=115200)
-                resourceId = resourceRef.query('*IDN?')
-                not self._quiet and print("ResourseRef:",resourceRef," ResourceId:",resourceId)
-                if "XDM1241" in resourceId:
-                    self._xdm1241 = resourceRef
-                    # Set to default configuration
-                    time.sleep(.5)
-                    self.congigure("voltdc",0,0)
-                    break
-            except Exception as inst:
-                not self._quiet and print(inst)
-                pass
+        timer = time.time() + timeout
+        while timer >  time.time() and not self.isConnected():
+            not self._quiet and print("Connecting...")
+            for resource in self.rm.list_resources('^ASRL/dev/ttyUSB'):
+                name  = resource
+                not self._quiet and print("Resource name:",name)
+                try:
+                    resourceRef= self.rm.open_resource(name,baud_rate=115200)
+                    resourceId = resourceRef.query('*IDN?')
+                    not self._quiet and print("ResourseRef:",resourceRef," ResourceId:",resourceId)
+                    if "XDM1241" in resourceId:
+                        self._xdm1241 = resourceRef
+                        # Set to default configuration
+                        time.sleep(.5)
+                        self.congigure("voltdc",0,0)
+                        break
+                except Exception as inst:
+                    not self._quiet and print(inst)
+            time.sleep(1)
         return  self.isConnected()
 
     def configure(self,type, range,rate):

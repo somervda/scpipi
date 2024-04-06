@@ -21,21 +21,26 @@ class Dho804:
         self.rm = pyvisa.ResourceManager('@py')
         not self._quiet and print(self.rm.list_resources())
 
-    def connect(self):
+    def connect(self,timeout=5):
         not self._quiet and print("connect")
         # Open the dho804 device 
         # Its a tcpIP interface so connection to host either works or it doesnt
-        try:
-            resource=self.rm.open_resource('TCPIP::dso804.home::INSTR')
+        timer = time.time() + timeout
+        while timer >  time.time() and not self.isConnected():
+            not self._quiet and print("Connecting...")
+            try:
+                resource=self.rm.open_resource('TCPIP::dso804.home::INSTR')
+                time.sleep(1)
+                # Test by sending first channel on command
+                resourceId = resource.query('*IDN?')
+                not self._quiet and print(" ResourceId:",resourceId)
+                if "DHO804" in resourceId:
+                    not self._quiet and print("dho804 found:",resource)
+                    self._dho804 = resource
+                    break
+            except Exception as inst:
+                not self._quiet and print(inst)
             time.sleep(1)
-            # Test by sending first channel on command
-            resourceId = resource.query('*IDN?')
-            not self._quiet and print(" ResourceId:",resourceId)
-            if "DHO804" in resourceId:
-                not self._quiet and print("dho804 found:",resource)
-                self._dho804 = resource
-        except Exception as inst:
-            not self._quiet and print(inst)
         return self.isConnected()
 
 

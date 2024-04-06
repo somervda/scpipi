@@ -109,7 +109,7 @@ def sds1052Measure(type: Annotated[str, Path(title="Measurement type i.e. RMS, P
 
 # *** dho804 Oscilloscope web services  *****
 
-dho804 = Dho804(quiet=False)
+dho804 = Dho804(quiet=True)
 
 @app.get("/dho804/connect")
 def dho804Connect():
