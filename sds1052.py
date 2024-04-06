@@ -40,6 +40,10 @@ class Sds1052:
             except Exception as inst:
                 not self._quiet and print(inst)
             time.sleep(1)
+        try:
+            self._sds1052.write('ASET')
+        except:
+            pass
         return self.isConnected()
 
 
