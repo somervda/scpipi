@@ -1,3 +1,6 @@
+import sys
+sys.path.append("lib")
+
 import pyvisa
 import time
 

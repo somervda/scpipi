@@ -1,6 +1,8 @@
 import pyvisa
 import time
 
+import sys
+sys.path.append("lib")
 
 rm = pyvisa.ResourceManager('@py')
 print(rm.list_resources())

@@ -6,6 +6,9 @@
 # uvicorn web:app --reload --host scpipi.local
 
 import sys
+sys.path.append("lib")
+
+import sys
 import time
 import asyncio
 # import pyvisa
@@ -22,6 +25,7 @@ from xdm1241 import Xdm1241
 from jds6600 import Jds6600
 from sds1052 import Sds1052
 from dho804 import Dho804
+from helper import Helper
 
 
 app = FastAPI()
@@ -122,6 +126,17 @@ def dho804isConnected():
 @app.get("/dho804/measure/{type}")
 def dho804Measure(type: Annotated[str, Path(title="Measurement type i.e. VRMS, VPPK, FREQ,RPH")]):
     return dho804.measure(type)
+
+# Helper Functions
+helper = Helper()
+
+@app.get("/results")
+def getResults():
+    return helper.getResults()
+
+@app.get("/result/{name}")
+def getResult(name: Annotated[str, Path(title="Name of the result")]):
+    return helper.getResult(name)
 
 # Note: Make sure this line is at the end of the file so fastAPI falls through the other
 # routes before serving up static files 

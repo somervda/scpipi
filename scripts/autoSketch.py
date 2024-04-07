@@ -1,4 +1,6 @@
 #!/usr/bin/python3
+import sys
+sys.path.append("lib")
 
 from xdm1241 import Xdm1241
 from jds6600 import Jds6600
@@ -28,6 +30,7 @@ if not sds1052.connect():
 time.sleep(3)
 #  Main automation loop
 while (start + 2000) > time.time():
+    helper.writeStatus("auto","running",step,"")
     rowJson=helper.startRow(step)
     rowJson=helper.addRowMeasurement(rowJson,"frequency","",freq)
 

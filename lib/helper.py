@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 import datetime
+import json
+import glob
+import os
 
 
 class Helper:
@@ -41,3 +44,35 @@ class Helper:
     def writeJsonTable(self,name,tableJson):
         with open("./results/" + name + ".json", "w") as result_file:
             result_file.write("[" + tableJson + "]")
+
+    def writeStatus(self,name,state,step,message,freq=-1):
+        with open("./scripts/status.json", "w") as status_file:
+            status = {}
+            status["name"] = name
+            status["state"] = state
+            status["step"] = step
+            if freq != -1 :
+                status["freq"] = freq
+            status["message"] = message
+            status_file.write(json.dumps(status))
+
+    def removeStatus(self):
+        try:
+            os.remove("./scripts/status.json")
+        except:
+            pass
+
+
+    def saveScript(self,name,script):
+        with open("./scripts/" + name + ".py", "w") as script_file:
+            script_file.write(script)
+
+    def getScripts(self):
+        return glob.glob("scripts/*.py")
+
+    def getResults(self):
+        return glob.glob("results/*.json")
+
+    def getResult(self,name):
+        with open("results/" + name + ".json","r") as results_file:
+            return (json.load(results_file))
