@@ -68,7 +68,11 @@ class Helper:
             script_file.write(script)
 
     def deleteScript(self,name):
-        os.remove("scripts/" + name + ".py")
+        try:
+            os.remove("scripts/" + name + ".py")
+            return True
+        except:
+            return False
 
 
     def getScripts(self):
@@ -82,4 +86,8 @@ class Helper:
             return (json.load(results_file))
 
     def deleteResult(self,name):
-        os.remove("results/" + name + ".json")
+        try:
+            os.remove("results/" + name + ".json")
+            return True
+        except:
+            return False

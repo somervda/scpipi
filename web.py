@@ -130,7 +130,7 @@ def dho804Measure(type: Annotated[str, Path(title="Measurement type i.e. VRMS, V
 # Helper Functions
 helper = Helper()
 
-@app.get("/results")
+@app.get("/result")
 def getResults():
     return helper.getResults()
 
@@ -138,14 +138,22 @@ def getResults():
 def getResult(name: Annotated[str, Path(title="Name of the result")]):
     return helper.getResult(name)
 
-@app.get("/scripts")
+@app.delete("/result/{name}")
+def deleteResult(name: Annotated[str, Path(title="Name of the result to delete")]):
+    return helper.deleteResult(name)
+
+@app.get("/script")
 def getScripts():
     return helper.getScripts()
 
+@app.delete("/script/{name}")
+def deleteScript(name: Annotated[str, Path(title="Name of the script to delete")]):
+    return helper.deleteScript(name)
+
 @app.post("/savescript/{name}")
 async def saveScript(name : str, request: Request):
+    # Use request object to pull the post body that contains the script
     script = await request.body()
-    print(script.decode("utf-8"))
     return helper.saveScript(name,script.decode("utf-8"))
 
 # @app.get("/script/{name}")
