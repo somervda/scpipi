@@ -64,8 +64,12 @@ class Helper:
 
 
     def saveScript(self,name,script):
-        with open("./scripts/" + name + ".py", "w") as script_file:
+        with open("scripts/" + name + ".py", "w") as script_file:
             script_file.write(script)
+
+    def deleteScript(self,name):
+        os.remove("scripts/" + name + ".py")
+
 
     def getScripts(self):
         return glob.glob("scripts/*.py")
@@ -76,3 +80,6 @@ class Helper:
     def getResult(self,name):
         with open("results/" + name + ".json","r") as results_file:
             return (json.load(results_file))
+
+    def deleteResult(self,name):
+        os.remove("results/" + name + ".json")

@@ -53,6 +53,7 @@ sudo apt install -y lxi-tools
 echo 6. Install fastapi for web services and a ASGI web server
 pip install fastapi
 pip install "uvicorn[standard]"
+pip install python-multipart
 # Note: I run uvicorn using this command during development
 # uvicorn web:app --reload --host scpipi.local
 

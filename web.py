@@ -17,7 +17,7 @@ import asyncio
 
 # fastAPI 
 from typing import Union,Annotated
-from fastapi import FastAPI,Path
+from fastapi import FastAPI,Path,Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -137,6 +137,20 @@ def getResults():
 @app.get("/result/{name}")
 def getResult(name: Annotated[str, Path(title="Name of the result")]):
     return helper.getResult(name)
+
+@app.get("/scripts")
+def getScripts():
+    return helper.getScripts()
+
+@app.post("/savescript/{name}")
+async def saveScript(name : str, request: Request):
+    script = await request.body()
+    print(script.decode("utf-8"))
+    return helper.saveScript(name,script.decode("utf-8"))
+
+# @app.get("/script/{name}")
+# def getScript(name: Annotated[str, Path(title="Name of the script")]):
+#     return helper.getScript(name)
 
 # Note: Make sure this line is at the end of the file so fastAPI falls through the other
 # routes before serving up static files 
