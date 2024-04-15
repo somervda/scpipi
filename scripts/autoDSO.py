@@ -24,26 +24,34 @@ if not jds6600.connect():
 freq=8
 jds6600.configure(freq,1,0)
 time.sleep(1)
+dho804 = Dho804(quiet=True)
+if not dho804.connect():
+    print("Error: Rigol dho804 oscilloscope did not connect, ending....")
+    exit(0)
 
 #  Main automation loop
-while (start + 200) > time.time():
+while (start + 0) > time.time():
     rowJson=helper.startRow(step)
     rowJson=helper.addRowMeasurement(rowJson,"frequency","",freq)
-    helper.writeStatus("test","running",step,"",freq)
+    helper.writeStatus("auto","running",step,"",freq)
 
     #  Collect Measurements
+    measure=dho804.measure("VPP")
+    rowJson=helper.addRowMeasurement(rowJson,"dho804","VPP",str(measure["measure"]))
+    measure=dho804.measure("FREQ")
+    rowJson=helper.addRowMeasurement(rowJson,"dho804","FREQ",str(measure["measure"]))
     print("rowJson:",rowJson)
     tableJson=helper.addTableRow(tableJson,rowJson)
 
     #  Update JDS6600 frequency
     freq *= 1.059
-    if freq>20000:
+    if freq>100000:
         break
     freq = round(freq, 1)
     jds6600.configure(freq,1,0)
-    time.sleep(1)
+    time.sleep(0)
     step+=1
 
 #  Write the results
-helper.writeJsonTable("test",tableJson)
+helper.writeJsonTable("auto",tableJson)
 helper.removeStatus()

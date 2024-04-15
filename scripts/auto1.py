@@ -17,33 +17,18 @@ result=[]
 start=time.time()
 step=1
 tableJson=""
-jds6600 = Jds6600(quiet=True)
-if not jds6600.connect():
-    print("Error: jds6600 signal generator did not connect, ending....")
-    exit(0)
-freq=8
-jds6600.configure(freq,1,0)
-time.sleep(1)
 
 #  Main automation loop
-while (start + 200) > time.time():
+while (start + 0) > time.time():
     rowJson=helper.startRow(step)
-    rowJson=helper.addRowMeasurement(rowJson,"frequency","",freq)
-    helper.writeStatus("test","running",step,"",freq)
+    helper.writeStatus("auto1","running",step,"")
 
     #  Collect Measurements
     print("rowJson:",rowJson)
     tableJson=helper.addTableRow(tableJson,rowJson)
-
-    #  Update JDS6600 frequency
-    freq *= 1.059
-    if freq>20000:
-        break
-    freq = round(freq, 1)
-    jds6600.configure(freq,1,0)
-    time.sleep(1)
+    time.sleep(0)
     step+=1
 
 #  Write the results
-helper.writeJsonTable("test",tableJson)
+helper.writeJsonTable("auto1",tableJson)
 helper.removeStatus()

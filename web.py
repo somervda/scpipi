@@ -11,6 +11,7 @@ sys.path.append("lib")
 import sys
 import time
 import asyncio
+import json
 # import pyvisa
 
 
@@ -130,6 +131,28 @@ def dho804Measure(type: Annotated[str, Path(title="Measurement type i.e. VRMS, V
 # Helper Functions
 helper = Helper()
 
+
+
+@app.get("/status")
+def getResults():
+    return helper.getStatus()
+
+@app.get("/schema")
+def getSchemas():
+    return helper.getSchemas()
+
+@app.get("/schema/{name}")
+def getSchema(name: Annotated[str, Path(title="Name of the schema")]):
+    return helper.getSchema(name)
+
+@app.post("/schema/{name}")
+async def saveSchema(name : str, request: Request):
+    # Use request object to pull the post body that contains the schema
+    schema = await request.body()
+    schema = schema.decode("utf-8")
+    print(schema)
+    return helper.writeSchema(name,json.loads(schema))
+
 @app.get("/result")
 def getResults():
     return helper.getResults()
@@ -150,15 +173,12 @@ def getScripts():
 def deleteScript(name: Annotated[str, Path(title="Name of the script to delete")]):
     return helper.deleteScript(name)
 
-@app.post("/savescript/{name}")
+@app.post("/script/{name}")
 async def saveScript(name : str, request: Request):
     # Use request object to pull the post body that contains the script
     script = await request.body()
-    return helper.saveScript(name,script.decode("utf-8"))
+    return helper.writeScript(name,script.decode("utf-8"))
 
-# @app.get("/script/{name}")
-# def getScript(name: Annotated[str, Path(title="Name of the script")]):
-#     return helper.getScript(name)
 
 # Note: Make sure this line is at the end of the file so fastAPI falls through the other
 # routes before serving up static files 

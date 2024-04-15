@@ -1,0 +1,1 @@
+{"name": "test", "maxSeconds": 200, "stepSeconds": 1, "useJds6600": true, "meters": [], "jds6600StartHz": "8", "jds6600StepFactor": "1.059", "jds6600Operator": "*", "jds6600StopHz": "20000"}

@@ -42,11 +42,11 @@ class Helper:
         return tableJson
 
     def writeJsonTable(self,name,tableJson):
-        with open("./results/" + name + ".json", "w") as result_file:
+        with open("results/" + name + ".json", "w") as result_file:
             result_file.write("[" + tableJson + "]")
 
     def writeStatus(self,name,state,step,message,freq=-1):
-        with open("./scripts/status.json", "w") as status_file:
+        with open("scripts/status.json", "w") as status_file:
             status = {}
             status["name"] = name
             status["state"] = state
@@ -56,16 +56,27 @@ class Helper:
             status["message"] = message
             status_file.write(json.dumps(status))
 
+    def getStatus():
+        with open("scripts/status.json","r") as status_file:
+            return (json.load(status_file))
+
+
     def removeStatus(self):
         try:
             os.remove("./scripts/status.json")
+            return True
         except:
-            pass
+            return False
 
 
-    def saveScript(self,name,script):
-        with open("scripts/" + name + ".py", "w") as script_file:
-            script_file.write(script)
+    def writeScript(self,name,script):
+        try:
+            with open("scripts/" + name + ".py", "w") as script_file:
+                script_file.write(script)
+            return True
+        except exception as e:
+            print("writeScript error:",e)
+            return False
 
     def deleteScript(self,name):
         try:
@@ -88,6 +99,31 @@ class Helper:
     def deleteResult(self,name):
         try:
             os.remove("results/" + name + ".json")
+            return True
+        except:
+            return False
+
+    def getSchemas(self):
+        return glob.glob("schemas/*.json")
+
+    def getSchema(self,name):
+        with open("schemas/" + name + ".json","r") as schema_file:
+            return (json.load(schema_file))
+    
+    def writeSchema(self,name,schema):
+        # schema is structured (not string)
+        try:
+            with open("schemas/" + name + ".json","w") as schema_file:
+                schema_file.write(json.dumps(schema))
+            return True
+        except exception as e:
+            print("writeSchema error:",e)
+            return False
+
+
+    def deleteSchema(self,name):
+        try:
+            os.remove("schemas/" + name + ".json")
             return True
         except:
             return False
