@@ -19,7 +19,7 @@ class Xdm1241:
         not self._quiet and print("__init__")
         self.rm = pyvisa.ResourceManager('@py')
 
-    def connect(self):
+    def connect(self,timeout=5):
         not self._quiet and print("connect")
         # Look for the _xdm1241 device among the resources
         self._xdm1241=None
