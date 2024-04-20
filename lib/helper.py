@@ -1,16 +1,22 @@
 #!/usr/bin/python3
 import datetime
+import time
 import json
 import glob
 import os
+import psutil
 
 
 class Helper:
     _quiet = True
+    name = ""
+    
 
-    def __init__(self,quiet=True):
+    def __init__(self,name,quiet=True):
         self._quiet = quiet
         not self._quiet and print("__init__")
+        self.lastTime= time.time()
+        self.name = name
 
     def addRowMeasurement(self,rowJson,deviceName,type,measure): 
         # Format a measurement into a json string and add it to
@@ -29,7 +35,7 @@ class Helper:
         # Adds the step number and a timestamp in iso format (Most standard available, works in excel)
         not self._quiet and print("makeStepJson")
         now = datetime.datetime.now()
-        iso_time = now.strftime("%Y-%m-%dT%H:%M:%SZ") 
+        iso_time = now.strftime("%Y-%m-%dT%H:%M:%S") 
         rowJson = '"step":' + str(step) + ',"timestamp":"' + iso_time + '"' 
         return rowJson
     
@@ -39,16 +45,20 @@ class Helper:
             tableJson += "{" + rowJson + "}\r\n"
         else:
             tableJson += ",{" + rowJson + "}\r\n"
+        # Write latest verion of table every minute
+        if (time.time()> self.lastTime + 60):
+            self.writeJsonTable(tableJson)
+            self.lastTime = time.time()
         return tableJson
 
-    def writeJsonTable(self,name,tableJson):
-        with open("results/" + name + ".json", "w") as result_file:
+    def writeJsonTable(self,tableJson):
+        with open("results/" + self.name + ".json", "w") as result_file:
             result_file.write("[" + tableJson + "]")
 
-    def writeStatus(self,name,state,step,message,freq=-1):
+    def writeStatus(self,state,step,message,freq=-1):
         with open("scripts/status.json", "w") as status_file:
             status = {}
-            status["name"] = name
+            status["name"] = self.name
             status["state"] = state
             status["step"] = step
             if freq != -1 :
@@ -56,9 +66,21 @@ class Helper:
             status["message"] = message
             status_file.write(json.dumps(status))
 
-    def getStatus():
-        with open("scripts/status.json","r") as status_file:
-            return (json.load(status_file))
+    def getStatus(self):
+        status = []
+        # Check if there is a ststus.json file present
+        try:
+            with open("scripts/status.json","r") as status_file:
+                status = json.load(status_file)
+        except:
+            pass
+        # Check if there are any running scripts
+        scriptPid = -1
+        for process in psutil.process_iter():
+            if len(process.cmdline())>=2:
+                if "scripts/" in process.cmdline()[1]:
+                    status["pid"] = process.pid
+        return (status)
 
 
     def removeStatus(self):

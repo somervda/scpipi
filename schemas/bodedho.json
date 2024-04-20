@@ -1,1 +1,0 @@
-{"name": "bodedho", "maxSeconds": "300", "stepSeconds": "1", "useJds6600": true, "jds6600StartHz": "8", "jds6600StepFactor": "1.059", "jds6600Operator": "*", "jds6600StopHz": "20000", "meters": [{"deviceName": "dho804", "type": "VPP"}, {"deviceName": "dho804", "type": "FREQ"}]}

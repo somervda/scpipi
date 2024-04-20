@@ -12,6 +12,8 @@ import sys
 import time
 import asyncio
 import json
+from subprocess import Popen
+import os
 # import pyvisa
 
 
@@ -129,12 +131,12 @@ def dho804Measure(type: Annotated[str, Path(title="Measurement type i.e. VRMS, V
     return dho804.measure(type)
 
 # Helper Functions
-helper = Helper()
+helper = Helper("")
 
 
 
 @app.get("/status")
-def getResults():
+def getStatus():
     return helper.getStatus()
 
 @app.get("/schema")
@@ -152,6 +154,10 @@ async def saveSchema(name : str, request: Request):
     schema = schema.decode("utf-8")
     print(schema)
     return helper.writeSchema(name,json.loads(schema))
+
+@app.delete("/schema/{name}")
+def deleteSchema(name: Annotated[str, Path(title="Name of the schema to delete")]):
+    return helper.deleteSchema(name)
 
 @app.get("/result")
 def getResults():
@@ -178,6 +184,14 @@ async def saveScript(name : str, request: Request):
     # Use request object to pull the post body that contains the script
     script = await request.body()
     return helper.writeScript(name,script.decode("utf-8"))
+
+@app.get("/run/{name}")
+async def runScript(name: Annotated[str, Path(title="Name of the script to run")]):
+    # result = subprocess.call("python scripts/" + name + ".py", shell=True)
+    result =  os.system("python scripts/" + name + ".py &")
+    print(result)
+
+
 
 
 # Note: Make sure this line is at the end of the file so fastAPI falls through the other

@@ -42,7 +42,7 @@ class Jds6600:
                         break
                 except Exception as inst:
                     not self._quiet and print(inst)
-                timer.sleep(1)
+                time.sleep(1)
         return  self.isConnected()
 
     def isConnected(self):
