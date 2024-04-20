@@ -1,1 +1,0 @@
-{"name": "auto", "maxSeconds": "110", "stepSeconds": "1", "useJds6600": false, "jds6600StartHz": 0, "jds6600StepFactor": 0, "jds6600Operator": "+", "jds6600StopHz": 0, "meters": []}
