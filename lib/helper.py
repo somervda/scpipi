@@ -4,6 +4,7 @@ import time
 import json
 import glob
 import os
+import signal
 import psutil
 
 
@@ -56,6 +57,17 @@ class Helper:
             result_file.write("[" + tableJson + "]")
 
     def writeStatus(self,state,step,message,freq=-1):
+        # Check if there is a kill.now file in which case
+        # clean things up and exit the script
+        if os.path.isfile("./scripts/kill.now"):
+            self.removeStatus()
+            try:
+                os.remove("./scripts/kill.now")
+            except:
+                pass
+            exit(0)
+
+
         with open("scripts/status.json", "w") as status_file:
             status = {}
             status["name"] = self.name
@@ -67,7 +79,7 @@ class Helper:
             status_file.write(json.dumps(status))
 
     def getStatus(self):
-        status = []
+        status = {}
         # Check if there is a ststus.json file present
         try:
             with open("scripts/status.json","r") as status_file:
@@ -75,12 +87,20 @@ class Helper:
         except:
             pass
         # Check if there are any running scripts
-        scriptPid = -1
         for process in psutil.process_iter():
             if len(process.cmdline())>=2:
                 if "scripts/" in process.cmdline()[1]:
                     status["pid"] = process.pid
         return (status)
+
+    def killScript(self):
+        try:
+            with open("scripts/kill.now", "w") as kill_file:
+                kill_file.write("")
+            return True
+        except exception as e:
+            print("killScript error:",e)
+            return False
 
 
     def removeStatus(self):

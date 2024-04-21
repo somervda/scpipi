@@ -130,6 +130,10 @@ def dho804isConnected():
 def dho804Measure(type: Annotated[str, Path(title="Measurement type i.e. VRMS, VPPK, FREQ,RPH")]):
     return dho804.measure(type)
 
+@app.get("/dho804/timebase/{value}")
+def dho804Timebase(value: Annotated[float, Path(title="seconds per division")]):
+    return dho804.timebase(value)
+
 # Helper Functions
 helper = Helper("")
 
@@ -175,6 +179,10 @@ def deleteResult(name: Annotated[str, Path(title="Name of the result to delete")
 def getScripts():
     return helper.getScripts()
 
+@app.get("/killscript")
+def killScript():
+    return helper.killScript()
+
 @app.delete("/script/{name}")
 def deleteScript(name: Annotated[str, Path(title="Name of the script to delete")]):
     return helper.deleteScript(name)
@@ -185,7 +193,7 @@ async def saveScript(name : str, request: Request):
     script = await request.body()
     return helper.writeScript(name,script.decode("utf-8"))
 
-@app.get("/run/{name}")
+@app.get("/runscript/{name}")
 async def runScript(name: Annotated[str, Path(title="Name of the script to run")]):
     # result = subprocess.call("python scripts/" + name + ".py", shell=True)
     result =  os.system("python scripts/" + name + ".py &")

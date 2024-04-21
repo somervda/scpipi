@@ -37,6 +37,10 @@ class Dho804:
                 if "DHO804" in resourceId:
                     not self._quiet and print("dho804 found:",resource)
                     self._dho804 = resource
+                    # # Do an autoscale when connected
+                    # print("autoscale")
+                    # resource.write(':AUToscale')
+                    # time.sleep(10)
                     break
             except Exception as inst:
                 not self._quiet and print(inst)
@@ -50,6 +54,56 @@ class Dho804:
             return True
         else: 
             return False
+
+    def fexp(self,f):
+        return int(math.floor(math.log10(abs(f)))) if f != 0 else 0
+
+    def fman(self,f):
+        return f/10**self.fexp(f)
+
+    def timebase(self,value):
+        # Set the timebase to the value 
+        # value must be in 1,2 or 5 steps 
+        # and range from  5ns/div to 50s/div
+        not self._quiet and print("timebase",value)
+        if not self.isConnected():
+            not self._quiet and  print("Connect to _dho804")
+            self.connect()
+        if self.isConnected():
+            # try:
+            if (value < 50 and value > 0.000000005):
+                # round value to a step 
+                exponent= self.fexp(value)
+                mantisa= self.fman(value)
+                if mantisa<2:
+                    mantisa = 2
+                elif mantisa<5:
+                    mantisa=5
+                else:
+                    mantisa=1
+                    exponent+=1
+                scaleValue= mantisa * 10**exponent
+                not self._quiet and print(':TIMebase:MAIN:SCALe ' + str(scaleValue))
+                self._dho804.write(':TIMebase:MAIN:SCALe ' + str(scaleValue))
+                return True
+            else:
+                return False
+
+    def volts(self,value):
+        # Set the volts per div to the value 
+        # value must be in 1mv to 10V 
+        not self._quiet and print("timebase",value)
+        if not self.isConnected():
+            not self._quiet and  print("Connect to _dho804")
+            self.connect()
+        if self.isConnected():
+            # try:
+            if (value <= 10 and value >= 0.001):
+                self._dho804.write(':CHANnel1:SCALe ' + str(value))
+                self._dho804.write(':CHANnel2:SCALe ' + str(value))
+                return True
+            else:
+                return False
 
     def measure(self,type): 
         # Return requested measurement type from wave on channel 1 as a float
