@@ -47,7 +47,7 @@ class Helper:
         else:
             tableJson += ",{" + rowJson + "}\r\n"
         # Write latest verion of table every minute
-        if (time.time()> self.lastTime + 60):
+        if (time.time()> self.lastTime + 15):
             self.writeJsonTable(tableJson)
             self.lastTime = time.time()
         return tableJson
