@@ -8,6 +8,14 @@
 # git clone https://github.com/somervda/scpipi.git
 # This file will now be in the pimidi folder
 
+# It seemd to help to increase the swapfile size of rpi zero device
+# I increased it to 140M
+# see https://raspberrypi.stackexchange.com/questions/70/how-to-set-up-swap-space
+# update /etc/dphys-swapfile  and run  /etc/init.d/dphys-swapfile restart
+# Also avoid installing python etc addin when using vscode remote
+# The node services dont run well on the memeory space of a RPI zero w 
+# https://medium.com/good-robot/use-visual-studio-code-remote-ssh-sftp-without-crashing-your-server-a1dc2ef0936d
+
 
 # Make sure apt is updated and we have the latest package lists before we start
 # Remember to 'sudo chmod u+x setup.sh' to be able to run this script 
